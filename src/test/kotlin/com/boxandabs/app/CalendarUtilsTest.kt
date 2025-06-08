@@ -22,4 +22,31 @@ class CalendarUtilsTest {
         assertEquals("today", days[todayIndex].status)
         assertTrue(days[todayIndex].isCurrentMonth)
     }
+
+    @Test
+    fun testCountCompletedDays() {
+        val days = listOf(
+            CalendarDay(1, "done", true),
+            CalendarDay(2, "done", true),
+            CalendarDay(3, "skipped", true),
+            CalendarDay(4, "done", true)
+        )
+
+        assertEquals(3, countCompletedDays(days))
+    }
+
+    @Test
+    fun testLongestStreak() {
+        val days = listOf(
+            CalendarDay(1, "done", true),
+            CalendarDay(2, "done", true),
+            CalendarDay(3, "skipped", true),
+            CalendarDay(4, "done", true),
+            CalendarDay(5, "done", true),
+            CalendarDay(6, "done", true),
+            CalendarDay(7, "rest", true)
+        )
+
+        assertEquals(3, longestStreak(days))
+    }
 }
