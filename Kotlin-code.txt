@@ -1,0 +1,1099 @@
+// MainActivity.kt
+package com.boxandabs.app
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.boxandabs.app.fragments.*
+
+class MainActivity : AppCompatActivity() {
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        
+        // Set default fragment
+        replaceFragment(HomeFragment())
+        
+        bottomNav.setOnItemSelectedListener { item ->
+            when(item.itemId) {
+                R.id.nav_home -> replaceFragment(HomeFragment())
+                R.id.nav_boxing -> replaceFragment(BoxingFragment())
+                R.id.nav_abs -> replaceFragment(AbsFragment())
+                R.id.nav_calendar -> replaceFragment(CalendarFragment())
+                R.id.nav_profile -> replaceFragment(ProfileFragment())
+            }
+            true
+        }
+    }
+    
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
+    }
+}
+
+// HomeFragment.kt
+package com.boxandabs.app.fragments
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.adapters.QuickWorkoutAdapter
+import com.boxandabs.app.models.Workout
+
+class HomeFragment : Fragment() {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        
+        val welcomeText = view.findViewById<TextView>(R.id.welcome_text)
+        val todayWorkoutBtn = view.findViewById<Button>(R.id.today_workout_btn)
+        val quickWorkoutsRv = view.findViewById<RecyclerView>(R.id.quick_workouts_rv)
+        
+        welcomeText.text = "Ready to Box & Strengthen Your Core?"
+        
+        // Setup quick workouts
+        val quickWorkouts = listOf(
+            Workout("Quick Boxing", "5 min", "boxing", R.drawable.ic_boxing),
+            Workout("Core Blast", "10 min", "abs", R.drawable.ic_abs),
+            Workout("Power Combo", "15 min", "combo", R.drawable.ic_combo)
+        )
+        
+        quickWorkoutsRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        quickWorkoutsRv.adapter = QuickWorkoutAdapter(quickWorkouts)
+        
+        return view
+    }
+}
+
+// BoxingFragment.kt
+package com.boxandabs.app.fragments
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.activities.BoxingWorkoutActivity
+import com.boxandabs.app.activities.ShadowboxingTimerActivity
+import com.boxandabs.app.activities.TechniqueGuideActivity
+import com.boxandabs.app.adapters.BoxingRoutineAdapter
+import com.boxandabs.app.models.BoxingRoutine
+
+class BoxingFragment : Fragment() {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_boxing, container, false)
+        
+        val routinesRv = view.findViewById<RecyclerView>(R.id.boxing_routines_rv)
+        
+        val routines = listOf(
+            BoxingRoutine("Beginner Boxing", "Basic combinations", "20 min", R.drawable.ic_beginner_boxing),
+            BoxingRoutine("Intermediate Combos", "Complex sequences", "30 min", R.drawable.ic_intermediate_boxing),
+            BoxingRoutine("Advanced Training", "Pro-level workout", "45 min", R.drawable.ic_advanced_boxing),
+            BoxingRoutine("Shadowboxing Timer", "Free form training", "Custom", R.drawable.ic_timer),
+            BoxingRoutine("Technique Guide", "Learn proper form", "Study", R.drawable.ic_technique)
+        )
+        
+        routinesRv.layoutManager = LinearLayoutManager(context)
+        routinesRv.adapter = BoxingRoutineAdapter(routines) { routine ->
+            when(routine.title) {
+                "Shadowboxing Timer" -> startActivity(Intent(context, ShadowboxingTimerActivity::class.java))
+                "Technique Guide" -> startActivity(Intent(context, TechniqueGuideActivity::class.java))
+                else -> {
+                    val intent = Intent(context, BoxingWorkoutActivity::class.java)
+                    intent.putExtra("routine", routine.title)
+                    startActivity(intent)
+                }
+            }
+        }
+        
+        return view
+    }
+}
+
+// AbsFragment.kt
+package com.boxandabs.app.fragments
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.activities.AbsWorkoutActivity
+import com.boxandabs.app.adapters.AbsWorkoutAdapter
+import com.boxandabs.app.models.AbsWorkout
+
+class AbsFragment : Fragment() {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_abs, container, false)
+        
+        val workoutsRv = view.findViewById<RecyclerView>(R.id.abs_workouts_rv)
+        
+        val workouts = listOf(
+            AbsWorkout("Beginner Core", "Foundation building", "15 min", "beginner", R.drawable.ic_beginner_abs),
+            AbsWorkout("Intermediate Circuit", "Strength & endurance", "25 min", "intermediate", R.drawable.ic_intermediate_abs),
+            AbsWorkout("Advanced Burn", "Maximum intensity", "35 min", "advanced", R.drawable.ic_advanced_abs),
+            AbsWorkout("Quick Core Blast", "Time-efficient workout", "10 min", "quick", R.drawable.ic_quick_abs),
+            AbsWorkout("Plank Challenge", "Isometric focus", "12 min", "plank", R.drawable.ic_plank)
+        )
+        
+        workoutsRv.layoutManager = LinearLayoutManager(context)
+        workoutsRv.adapter = AbsWorkoutAdapter(workouts) { workout ->
+            val intent = Intent(context, AbsWorkoutActivity::class.java)
+            intent.putExtra("workout_type", workout.level)
+            intent.putExtra("workout_name", workout.title)
+            startActivity(intent)
+        }
+        
+        return view
+    }
+}
+
+// CalendarFragment.kt
+package com.boxandabs.app.fragments
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.adapters.CalendarAdapter
+import com.boxandabs.app.models.CalendarDay
+import java.util.*
+
+class CalendarFragment : Fragment() {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
+        
+        val calendarRv = view.findViewById<RecyclerView>(R.id.calendar_rv)
+        
+        // Generate calendar days for current month
+        val calendarDays = generateCalendarDays()
+        
+        calendarRv.layoutManager = GridLayoutManager(context, 7)
+        calendarRv.adapter = CalendarAdapter(calendarDays)
+        
+        return view
+    }
+    
+    private fun generateCalendarDays(): List<CalendarDay> {
+        val calendar = Calendar.getInstance()
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val currentYear = calendar.get(Calendar.YEAR)
+        val today = calendar.get(Calendar.DAY_OF_MONTH)
+        
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val firstDayOfMonth = calendar.get(Calendar.DAY_OF_WEEK) - 1
+        val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        
+        val days = mutableListOf<CalendarDay>()
+        
+        // Add empty days for padding
+        repeat(firstDayOfMonth) {
+            days.add(CalendarDay(0, "", false))
+        }
+        
+        // Add actual days
+        for (day in 1..daysInMonth) {
+            val status = when {
+                day < today -> listOf("done", "skipped", "rest").random()
+                day == today -> "today"
+                else -> "upcoming"
+            }
+            days.add(CalendarDay(day, status, true))
+        }
+        
+        return days
+    }
+}
+
+// ProfileFragment.kt
+package com.boxandabs.app.fragments
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import com.boxandabs.app.R
+
+class ProfileFragment : Fragment() {
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_profile, container, false)
+        
+        val statsContainer = view.findViewById<View>(R.id.stats_container)
+        val workoutsCompleted = view.findViewById<TextView>(R.id.workouts_completed)
+        val totalTime = view.findViewById<TextView>(R.id.total_time)
+        val streak = view.findViewById<TextView>(R.id.current_streak)
+        
+        // Mock data
+        workoutsCompleted.text = "47"
+        totalTime.text = "23h 15m"
+        streak.text = "7 days"
+        
+        return view
+    }
+}
+
+// BoxingWorkoutActivity.kt
+package com.boxandabs.app.activities
+
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.adapters.BoxingRoundAdapter
+import com.boxandabs.app.models.BoxingRound
+
+class BoxingWorkoutActivity : AppCompatActivity() {
+    
+    private lateinit var timerText: TextView
+    private lateinit var roundText: TextView
+    private lateinit var startBtn: Button
+    private lateinit var pauseBtn: Button
+    private lateinit var roundsRv: RecyclerView
+    
+    private var timer: CountDownTimer? = null
+    private var currentRound = 0
+    private var isResting = false
+    private var timeRemaining = 180000L // 3 minutes
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_boxing_workout)
+        
+        val routineName = intent.getStringExtra("routine") ?: "Boxing Workout"
+        title = routineName
+        
+        initViews()
+        setupRounds(routineName)
+        setupButtons()
+    }
+    
+    private fun initViews() {
+        timerText = findViewById(R.id.timer_text)
+        roundText = findViewById(R.id.round_text)
+        startBtn = findViewById(R.id.start_btn)
+        pauseBtn = findViewById(R.id.pause_btn)
+        roundsRv = findViewById(R.id.rounds_rv)
+    }
+    
+    private fun setupRounds(routineName: String) {
+        val rounds = when(routineName) {
+            "Beginner Boxing" -> getBeginnerRounds()
+            "Intermediate Combos" -> getIntermediateRounds()
+            "Advanced Training" -> getAdvancedRounds()
+            else -> getBeginnerRounds()
+        }
+        
+        roundsRv.layoutManager = LinearLayoutManager(this)
+        roundsRv.adapter = BoxingRoundAdapter(rounds)
+        
+        updateRoundDisplay()
+    }
+    
+    private fun setupButtons() {
+        startBtn.setOnClickListener { startTimer() }
+        pauseBtn.setOnClickListener { pauseTimer() }
+    }
+    
+    private fun startTimer() {
+        timer = object : CountDownTimer(timeRemaining, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                timeRemaining = millisUntilFinished
+                updateTimerDisplay(millisUntilFinished)
+            }
+            
+            override fun onFinish() {
+                if (isResting) {
+                    // Rest finished, start next round
+                    currentRound++
+                    isResting = false
+                    timeRemaining = 180000L
+                    if (currentRound < getTotalRounds()) {
+                        updateRoundDisplay()
+                        startTimer()
+                    }
+                } else {
+                    // Round finished, start rest
+                    isResting = true
+                    timeRemaining = 60000L // 1 minute rest
+                    updateRoundDisplay()
+                    startTimer()
+                }
+            }
+        }.start()
+        
+        startBtn.isEnabled = false
+        pauseBtn.isEnabled = true
+    }
+    
+    private fun pauseTimer() {
+        timer?.cancel()
+        startBtn.isEnabled = true
+        pauseBtn.isEnabled = false
+    }
+    
+    private fun updateTimerDisplay(millisUntilFinished: Long) {
+        val minutes = millisUntilFinished / 1000 / 60
+        val seconds = (millisUntilFinished / 1000) % 60
+        timerText.text = String.format("%02d:%02d", minutes, seconds)
+    }
+    
+    private fun updateRoundDisplay() {
+        if (isResting) {
+            roundText.text = "Rest - Round ${currentRound + 1}"
+        } else {
+            roundText.text = "Round ${currentRound + 1} of ${getTotalRounds()}"
+        }
+    }
+    
+    private fun getTotalRounds(): Int = 5
+    
+    private fun getBeginnerRounds(): List<BoxingRound> {
+        return listOf(
+            BoxingRound(1, "Jab-Cross Combo", "1-2, 1-2, 1-2", "3:00"),
+            BoxingRound(2, "Hook Integration", "1-2-3, 1-2-3", "3:00"),
+            BoxingRound(3, "Basic Defense", "Slip & Counter", "3:00"),
+            BoxingRound(4, "Body Shots", "3-4 to Body", "3:00"),
+            BoxingRound(5, "Free Flow", "All Combinations", "3:00")
+        )
+    }
+    
+    private fun getIntermediateRounds(): List<BoxingRound> {
+        return listOf(
+            BoxingRound(1, "Speed Combinations", "1-2-3-2, 1-6-3-2", "3:00"),
+            BoxingRound(2, "Pivot & Strike", "Pivot-1-2, Pivot-3-4", "3:00"),
+            BoxingRound(3, "Head Movement", "Slip-Roll-Counter", "3:00"),
+            BoxingRound(4, "Power Shots", "2-3-2, 6-3-2", "3:00"),
+            BoxingRound(5, "Championship Round", "All Techniques", "3:00")
+        )
+    }
+    
+    private fun getAdvancedRounds(): List<BoxingRound> {
+        return listOf(
+            BoxingRound(1, "Complex Combos", "1-6-3-2-1-2", "3:00"),
+            BoxingRound(2, "Feint & Attack", "Feint-1-2-3-6-3-2", "3:00"),
+            BoxingRound(3, "Counter Punching", "Slip-2-3-2-uppercut", "3:00"),
+            BoxingRound(4, "Pressure Fighting", "Cut angles-3-4-3-2", "3:00"),
+            BoxingRound(5, "Championship", "Everything Combined", "3:00")
+        )
+    }
+}
+
+// ShadowboxingTimerActivity.kt
+package com.boxandabs.app.activities
+
+import android.media.MediaPlayer
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.widget.Button
+import android.widget.SeekBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.boxandabs.app.R
+
+class ShadowboxingTimerActivity : AppCompatActivity() {
+    
+    private lateinit var timerDisplay: TextView
+    private lateinit var roundDisplay: TextView
+    private lateinit var roundSeekBar: SeekBar
+    private lateinit var workSeekBar: SeekBar
+    private lateinit var restSeekBar: SeekBar
+    private lateinit var startBtn: Button
+    private lateinit var pauseBtn: Button
+    private lateinit var resetBtn: Button
+    
+    private var timer: CountDownTimer? = null
+    private var totalRounds = 3
+    private var workTime = 180 // 3 minutes
+    private var restTime = 60 // 1 minute
+    private var currentRound = 1
+    private var isWorking = true
+    private var timeRemaining = workTime * 1000L
+    private var isRunning = false
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_shadowboxing_timer)
+        
+        title = "Shadowboxing Timer"
+        initViews()
+        setupSeekBars()
+        setupButtons()
+        updateDisplay()
+    }
+    
+    private fun initViews() {
+        timerDisplay = findViewById(R.id.timer_display)
+        roundDisplay = findViewById(R.id.round_display)
+        roundSeekBar = findViewById(R.id.rounds_seekbar)
+        workSeekBar = findViewById(R.id.work_seekbar)
+        restSeekBar = findViewById(R.id.rest_seekbar)
+        startBtn = findViewById(R.id.start_timer_btn)
+        pauseBtn = findViewById(R.id.pause_timer_btn)
+        resetBtn = findViewById(R.id.reset_timer_btn)
+    }
+    
+    private fun setupSeekBars() {
+        roundSeekBar.max = 10
+        roundSeekBar.progress = 3
+        workSeekBar.max = 300 // 5 minutes max
+        workSeekBar.progress = 180
+        restSeekBar.max = 120 // 2 minutes max
+        restSeekBar.progress = 60
+        
+        roundSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                totalRounds = maxOf(1, progress)
+                findViewById<TextView>(R.id.rounds_text).text = "Rounds: $totalRounds"
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+        
+        workSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                workTime = maxOf(30, progress)
+                findViewById<TextView>(R.id.work_text).text = "Work: ${workTime}s"
+                if (isWorking) timeRemaining = workTime * 1000L
+                updateDisplay()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+        
+        restSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                restTime = maxOf(15, progress)
+                findViewById<TextView>(R.id.rest_text).text = "Rest: ${restTime}s"
+                if (!isWorking) timeRemaining = restTime * 1000L
+                updateDisplay()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+    }
+    
+    private fun setupButtons() {
+        startBtn.setOnClickListener { startTimer() }
+        pauseBtn.setOnClickListener { pauseTimer() }
+        resetBtn.setOnClickListener { resetTimer() }
+    }
+    
+    private fun startTimer() {
+        if (!isRunning) {
+            isRunning = true
+            timer = object : CountDownTimer(timeRemaining, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    timeRemaining = millisUntilFinished
+                    updateDisplay()
+                }
+                
+                override fun onFinish() {
+                    playBeep()
+                    if (isWorking) {
+                        // Work period finished, start rest
+                        isWorking = false
+                        timeRemaining = restTime * 1000L
+                        updateDisplay()
+                        startTimer()
+                    } else {
+                        // Rest finished, start next round or finish
+                        currentRound++
+                        if (currentRound <= totalRounds) {
+                            isWorking = true
+                            timeRemaining = workTime * 1000L
+                            updateDisplay()
+                            startTimer()
+                        } else {
+                            // Workout complete
+                            resetTimer()
+                        }
+                    }
+                }
+            }.start()
+            
+            startBtn.isEnabled = false
+            pauseBtn.isEnabled = true
+        }
+    }
+    
+    private fun pauseTimer() {
+        timer?.cancel()
+        isRunning = false
+        startBtn.isEnabled = true
+        pauseBtn.isEnabled = false
+    }
+    
+    private fun resetTimer() {
+        timer?.cancel()
+        isRunning = false
+        currentRound = 1
+        isWorking = true
+        timeRemaining = workTime * 1000L
+        startBtn.isEnabled = true
+        pauseBtn.isEnabled = false
+        updateDisplay()
+    }
+    
+    private fun updateDisplay() {
+        val minutes = (timeRemaining / 1000) / 60
+        val seconds = (timeRemaining / 1000) % 60
+        timerDisplay.text = String.format("%02d:%02d", minutes, seconds)
+        
+        val status = if (isWorking) "WORK" else "REST"
+        roundDisplay.text = "Round $currentRound/$totalRounds - $status"
+    }
+    
+    private fun playBeep() {
+        // Simple beep implementation
+        try {
+            val mediaPlayer = MediaPlayer.create(this, R.raw.beep)
+            mediaPlayer?.start()
+        } catch (e: Exception) {
+            // Handle error silently
+        }
+    }
+}
+
+// AbsWorkoutActivity.kt
+package com.boxandabs.app.activities
+
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.adapters.AbsExerciseAdapter
+import com.boxandabs.app.models.AbsExercise
+
+class AbsWorkoutActivity : AppCompatActivity() {
+    
+    private lateinit var exerciseTitle: TextView
+    private lateinit var exerciseInstructions: TextView
+    private lateinit var timerText: TextView
+    private lateinit var repText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var startBtn: Button
+    private lateinit var nextBtn: Button
+    private lateinit var exercisesRv: RecyclerView
+    
+    private var exercises = listOf<AbsExercise>()
+    private var currentExerciseIndex = 0
+    private var timer: CountDownTimer? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_abs_workout)
+        
+        val workoutType = intent.getStringExtra("workout_type") ?: "beginner"
+        val workoutName = intent.getStringExtra("workout_name") ?: "Abs Workout"
+        
+        title = workoutName
+        
+        initViews()
+        setupExercises(workoutType)
+        setupButtons()
+        displayCurrentExercise()
+    }
+    
+    private fun initViews() {
+        exerciseTitle = findViewById(R.id.exercise_title)
+        exerciseInstructions = findViewById(R.id.exercise_instructions)
+        timerText = findViewById(R.id.exercise_timer)
+        repText = findViewById(R.id.rep_counter)
+        progressBar = findViewById(R.id.workout_progress)
+        startBtn = findViewById(R.id.start_exercise_btn)
+        nextBtn = findViewById(R.id.next_exercise_btn)
+        exercisesRv = findViewById(R.id.exercises_list_rv)
+    }
+    
+    private fun setupExercises(workoutType: String) {
+        exercises = when(workoutType) {
+            "beginner" -> getBeginnerExercises()
+            "intermediate" -> getIntermediateExercises()
+            "advanced" -> getAdvancedExercises()
+            "quick" -> getQuickExercises()
+            "plank" -> getPlankExercises()
+            else -> getBeginnerExercises()
+        }
+        
+        exercisesRv.layoutManager = LinearLayoutManager(this)
+        exercisesRv.adapter = AbsExerciseAdapter(exercises)
+        
+        progressBar.max = exercises.size
+        progressBar.progress = 0
+    }
+    
+    private fun setupButtons() {
+        startBtn.setOnClickListener { startExercise() }
+        nextBtn.setOnClickListener { nextExercise() }
+    }
+    
+    private fun displayCurrentExercise() {
+        if (currentExerciseIndex < exercises.size) {
+            val exercise = exercises[currentExerciseIndex]
+            exerciseTitle.text = exercise.name
+            exerciseInstructions.text = exercise.instructions
+            
+            if (exercise.isTimeBased) {
+                timerText.text = "${exercise.duration}s"
+                repText.text = ""
+            } else {
+                timerText.text = ""
+                repText.text = "${exercise.reps} reps"
+            }
+            
+            progressBar.progress = currentExerciseIndex
+        }
+    }
+    
+    private fun startExercise() {
+        val exercise = exercises[currentExerciseIndex]
+        
+        if (exercise.isTimeBased) {
+            startTimer(exercise.duration)
+        } else {
+            // For rep-based exercises, just enable next button
+            nextBtn.isEnabled = true
+        }
+        
+        startBtn.isEnabled = false
+    }
+    
+    private fun startTimer(seconds: Int) {
+        timer = object : CountDownTimer((seconds * 1000).toLong(), 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsRemaining = millisUntilFinished / 1000
+                timerText.text = "${secondsRemaining}s"
+            }
+            
+            override fun onFinish() {
+                timerText.text = "Done!"
+                nextBtn.isEnabled = true
+            }
+        }.start()
+    }
+    
+    private fun nextExercise() {
+        timer?.cancel()
+        currentExerciseIndex++
+        
+        if (currentExerciseIndex < exercises.size) {
+            displayCurrentExercise()
+            startBtn.isEnabled = true
+            nextBtn.isEnabled = false
+        } else {
+            // Workout completed
+            exerciseTitle.text = "Workout Complete!"
+            exerciseInstructions.text = "Great job! You've completed the workout."
+            timerText.text = ""
+            repText.text = ""
+            startBtn.isEnabled = false
+            nextBtn.isEnabled = false
+            progressBar.progress = exercises.size
+        }
+    }
+    
+    private fun getBeginnerExercises(): List<AbsExercise> {
+        return listOf(
+            AbsExercise("Crunches", "Lie on back, knees bent, hands behind head. Lift shoulders off ground.", 15, false, 0),
+            AbsExercise("Plank", "Hold straight line from head to heels", 0, true, 30),
+            AbsExercise("Mountain Climbers", "High plank, alternate bringing knees to chest", 20, false, 0),
+            AbsExercise("Dead Bug", "Lie on back, extend opposite arm and leg", 10, false, 0),
+            AbsExercise("Side Plank", "Hold on one side, keep body straight", 0, true, 20)
+        )
+    }
+    
+    private fun getIntermediateExercises(): List<AbsExercise> {
+        return listOf(
+            AbsExercise("Bicycle Crunches", "Pedal motion, elbow to opposite knee", 20, false, 0),
+            AbsExercise("Russian Twists", "Sit up, lean back, rotate side to side", 20, false, 0),
+            AbsExercise("Plank Up-Downs", "From plank to forearms and back", 12, false, 0),
+            AbsExercise("Leg Raises", "Lie down, lift straight legs to 90 degrees", 15, false, 0),
+            AbsExercise("Side Plank Dips", "Side plank, dip hip down and up", 10, false, 0),
+            AbsExercise("Hollow Hold", "Lie on back, lift shoulders and legs", 0, true, 30)
+        )
+    }
+    
+    private fun getAdvancedExercises(): List<AbsExercise> {
+        return listOf(
+            AbsExercise("V-Ups", "Lie flat, bring hands to toes in V shape", 15, false, 0),
+            AbsExercise("Plank Jacks", "Plank position, jump feet apart and together", 20, false, 0),
+            AbsExercise("Dragon Flags", "Lie on bench, lift body using core", 8, false, 0),
+            AbsExercise("Hanging Knee Raises", "Hang from bar, bring knees to chest", 12, false, 0),
+            AbsExercise("Turkish Get-Ups", "From lying to standing with weight", 5, false, 0),
+            AbsExercise("Plank to Pike", "From plank, pike hips up", 12, false, 0),
+            AbsExercise("L-Sit Hold", "Support body weight, legs extended", 0, true, 20)
+        )
+    }
+    
+    private fun getQuickExercises(): List<AbsExercise> {
+        return listOf(
+            AbsExercise("High Knees", "Run in place, bring knees up high", 0, true, 30),
+            AbsExercise("Crunches", "Basic ab crunch", 20, false, 0),
+            AbsExercise("Plank", "Hold plank position", 0, true, 30),
+            AbsExercise("Jumping Jacks", "Full body cardio", 0, true, 30),
+            AbsExercise("Mountain Climbers", "Fast alternating knee drives", 0, true, 30)
+        )
+    }
+    
+    private fun getPlankExercises(): List<AbsExercise> {
+        return listOf(
+            AbsExercise("Standard Plank", "Hold straight line from head to heels", 0, true, 60),
+            AbsExercise("Side Plank Right", "Hold on right side", 0, true, 30),
+            AbsExercise("Side Plank Left", "Hold on left side", 0, true, 30),
+            AbsExercise("Plank Up-Downs", "From plank to forearms", 10, false, 0),
+            AbsExercise("Plank with Leg Lifts", "Plank, lift one leg at a time", 20, false, 0),
+            AbsExercise("Final Plank Hold", "Maximum effort hold", 0, true, 45)
+        )
+    }
+}
+
+// TechniqueGuideActivity.kt
+package com.boxandabs.app.activities
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.adapters.TechniqueAdapter
+import com.boxandabs.app.models.Technique
+
+class TechniqueGuideActivity : AppCompatActivity() {
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_technique_guide)
+        
+        title = "Boxing Techniques"
+        
+        val techniquesRv = findViewById<RecyclerView>(R.id.techniques_rv)
+        
+        val techniques = listOf(
+            Technique("Jab (1)", "Quick straight punch with lead hand", "Keep elbow down, snap back quickly", R.drawable.ic_jab),
+            Technique("Cross (2)", "Power punch with rear hand", "Rotate hips and shoulders, step forward", R.drawable.ic_cross),
+            Technique("Lead Hook (3)", "Circular punch with lead hand", "Elbow parallel to ground, pivot on feet", R.drawable.ic_lead_hook),
+            Technique("Rear Hook (4)", "Circular punch with rear hand", "Shift weight to rear foot, rotate body", R.drawable.ic_rear_hook),
+            Technique("Lead Uppercut (5)", "Upward punch with lead hand", "Bend knees, drive up through legs", R.drawable.ic_lead_uppercut),
+            Technique("Rear Uppercut (6)", "Upward punch with rear hand", "Drop rear shoulder, drive up", R.drawable.ic_rear_uppercut),
+            Technique("Slip", "Head movement to avoid punches", "Move head off center line", R.drawable.ic_slip),
+            Technique("Bob and Weave", "Duck under punches", "Bend knees, keep hands up", R.drawable.ic_bob_weave),
+            Technique("Footwork", "Movement and positioning", "Stay on balls of feet, maintain stance", R.drawable.ic_footwork)
+        )
+        
+        techniquesRv.layoutManager = LinearLayoutManager(this)
+        techniquesRv.adapter = TechniqueAdapter(techniques)
+    }
+}
+
+// Data Models
+package com.boxandabs.app.models
+
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class Workout(
+    val title: String,
+    val duration: String,
+    val type: String,
+    val imageRes: Int
+) : Parcelable
+
+@Parcelize
+data class BoxingRoutine(
+    val title: String,
+    val description: String,
+    val duration: String,
+    val imageRes: Int
+) : Parcelable
+
+@Parcelize
+data class BoxingRound(
+    val roundNumber: Int,
+    val title: String,
+    val combinations: String,
+    val duration: String
+) : Parcelable
+
+@Parcelize
+data class AbsWorkout(
+    val title: String,
+    val description: String,
+    val duration: String,
+    val level: String,
+    val imageRes: Int
+) : Parcelable
+
+@Parcelize
+data class AbsExercise(
+    val name: String,
+    val instructions: String,
+    val reps: Int,
+    val isTimeBased: Boolean,
+    val duration: Int
+) : Parcelable
+
+@Parcelize
+data class CalendarDay(
+    val day: Int,
+    val status: String, // "done", "skipped", "rest", "today", "upcoming"
+    val isCurrentMonth: Boolean
+) : Parcelable
+
+@Parcelize
+data class Technique(
+    val name: String,
+    val description: String,
+    val tips: String,
+    val imageRes: Int
+) : Parcelable
+
+// Adapters
+package com.boxandabs.app.adapters
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.boxandabs.app.R
+import com.boxandabs.app.models.*
+
+class QuickWorkoutAdapter(private val workouts: List<Workout>) : RecyclerView.Adapter<QuickWorkoutAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.workout_title)
+        val duration: TextView = view.findViewById(R.id.workout_duration)
+        val icon: ImageView = view.findViewById(R.id.workout_icon)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quick_workout, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val workout = workouts[position]
+        holder.title.text = workout.title
+        holder.duration.text = workout.duration
+        holder.icon.setImageResource(workout.imageRes)
+    }
+    
+    override fun getItemCount() = workouts.size
+}
+
+class BoxingRoutineAdapter(
+    private val routines: List<BoxingRoutine>,
+    private val onItemClick: (BoxingRoutine) -> Unit
+) : RecyclerView.Adapter<BoxingRoutineAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.routine_title)
+        val description: TextView = view.findViewById(R.id.routine_description)
+        val duration: TextView = view.findViewById(R.id.routine_duration)
+        val icon: ImageView = view.findViewById(R.id.routine_icon)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_boxing_routine, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val routine = routines[position]
+        holder.title.text = routine.title
+        holder.description.text = routine.description
+        holder.duration.text = routine.duration
+        holder.icon.setImageResource(routine.imageRes)
+        
+        holder.itemView.setOnClickListener { onItemClick(routine) }
+    }
+    
+    override fun getItemCount() = routines.size
+}
+
+class BoxingRoundAdapter(private val rounds: List<BoxingRound>) : RecyclerView.Adapter<BoxingRoundAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val roundNumber: TextView = view.findViewById(R.id.round_number)
+        val title: TextView = view.findViewById(R.id.round_title)
+        val combinations: TextView = view.findViewById(R.id.round_combinations)
+        val duration: TextView = view.findViewById(R.id.round_duration)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_boxing_round, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val round = rounds[position]
+        holder.roundNumber.text = "Round ${round.roundNumber}"
+        holder.title.text = round.title
+        holder.combinations.text = round.combinations
+        holder.duration.text = round.duration
+    }
+    
+    override fun getItemCount() = rounds.size
+}
+
+class AbsWorkoutAdapter(
+    private val workouts: List<AbsWorkout>,
+    private val onItemClick: (AbsWorkout) -> Unit
+) : RecyclerView.Adapter<AbsWorkoutAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.abs_title)
+        val description: TextView = view.findViewById(R.id.abs_description)
+        val duration: TextView = view.findViewById(R.id.abs_duration)
+        val icon: ImageView = view.findViewById(R.id.abs_icon)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_abs_workout, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val workout = workouts[position]
+        holder.title.text = workout.title
+        holder.description.text = workout.description
+        holder.duration.text = workout.duration
+        holder.icon.setImageResource(workout.imageRes)
+        
+        holder.itemView.setOnClickListener { onItemClick(workout) }
+    }
+    
+    override fun getItemCount() = workouts.size
+}
+
+class AbsExerciseAdapter(private val exercises: List<AbsExercise>) : RecyclerView.Adapter<AbsExerciseAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val name: TextView = view.findViewById(R.id.exercise_name)
+        val details: TextView = view.findViewById(R.id.exercise_details)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_abs_exercise, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val exercise = exercises[position]
+        holder.name.text = exercise.name
+        holder.details.text = if (exercise.isTimeBased) {
+            "${exercise.duration} seconds"
+        } else {
+            "${exercise.reps} reps"
+        }
+    }
+    
+    override fun getItemCount() = exercises.size
+}
+
+class CalendarAdapter(private val days: List<CalendarDay>) : RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val dayText: TextView = view.findViewById(R.id.day_text)
+        val statusIndicator: View = view.findViewById(R.id.status_indicator)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_calendar_day, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val day = days[position]
+        
+        if (day.isCurrentMonth) {
+            holder.dayText.text = day.day.toString()
+            holder.dayText.alpha = 1.0f
+            
+            val colorRes = when(day.status) {
+                "done" -> R.color.calendar_done
+                "skipped" -> R.color.calendar_skipped
+                "rest" -> R.color.calendar_rest
+                "today" -> R.color.calendar_today
+                else -> R.color.calendar_upcoming
+            }
+            
+            holder.statusIndicator.setBackgroundResource(colorRes)
+            holder.statusIndicator.visibility = View.VISIBLE
+        } else {
+            holder.dayText.text = ""
+            holder.dayText.alpha = 0.3f
+            holder.statusIndicator.visibility = View.INVISIBLE
+        }
+    }
+    
+    override fun getItemCount() = days.size
+}
+
+class TechniqueAdapter(private val techniques: List<Technique>) : RecyclerView.Adapter<TechniqueAdapter.ViewHolder>() {
+    
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val name: TextView = view.findViewById(R.id.technique_name)
+        val description: TextView = view.findViewById(R.id.technique_description)
+        val tips: TextView = view.findViewById(R.id.technique_tips)
+        val icon: ImageView = view.findViewById(R.id.technique_icon)
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_technique, parent, false)
+        return ViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val technique = techniques[position]
+        holder.name.text = technique.name
+        holder.description.text = technique.description
+        holder.tips.text = technique.tips
+        holder.icon.setImageResource(technique.imageRes)
+    }
+    
+    override fun getItemCount() = techniques.size
+}
