@@ -584,6 +584,7 @@ class ShadowboxingTimerActivity : AppCompatActivity() {
         // Simple beep implementation
         try {
             val mediaPlayer = MediaPlayer.create(this, R.raw.beep)
+            mediaPlayer?.setOnCompletionListener { it.release() }
             mediaPlayer?.start()
         } catch (e: Exception) {
             // Handle error silently
