@@ -524,6 +524,7 @@ class ShadowboxingTimerActivity : AppCompatActivity() {
                 }
                 
                 override fun onFinish() {
+                    isRunning = false
                     playBeep()
                     if (isWorking) {
                         // Work period finished, start rest
